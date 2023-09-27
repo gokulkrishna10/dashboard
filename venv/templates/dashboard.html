@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style type="text/css">
+    body {
+    background-color: #E6E6FA;
+    }
+
+    .container {
+        margin: 100px auto;
+        text-align: center;
+    }
+
+    h1 {
+        font-size: 36px;
+        color: #FF4500;
+    }
+
+    select {
+        font-size: 24px;
+        color: #000080;
+        padding: 10px 20px;
+        margin-top: 20px;
+        border: none;
+        background-color: #FFDAB9;
+        border-radius: 5px;
+        box-shadow: 2px 2px 2px #888888;
+    }
+
+    </style>
+    <title>Welcome to the dashboard</title>
+</head>
+<body>
+<h1>Welcome to the Dashboard</h1>
+<select id="options" onchange="plotData()">
+    <option value="">Select an option</option>
+    <option value="Temperature">Temperature</option>
+    <option value="pH">pH</option>
+    <option value="Oxygen">Oxygen</option>
+    <option value="Pressure">Pressure</option>
+</select>
+<div id="plot"></div>
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script type="text/javascript">
+    function plotData() {
+        var option = document.getElementById("options").value;
+        if (option === "Temperature" || option === "pH" || option === "Oxygen" || option === "Pressure") {
+            fetch('/plot?' + new URLSearchParams({
+            key: option
+           }).toString(), {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    var trace1 = {
+                        x: data.times,
+                        y: data.values,
+                        mode: 'lines',
+                        name: option.charAt(0).toUpperCase() + option.slice(1)
+                    };
+                    var layout = {
+                        title: option.charAt(0).toUpperCase() + option.slice(1) + ' over Time',
+                        xaxis: {
+                            title: 'Time'
+                        },
+                        yaxis: {
+                            title: option.charAt(0).toUpperCase() + option.slice(1)
+                        }
+                    };
+                    Plotly.newPlot('plot', [trace1], layout);
+                })
+                .catch(error => console.log(error));
+        } else {
+            document.getElementById("plot").innerHTML = "";
+        }
+    }
+
+
+</script>
+</body>
+</html>
